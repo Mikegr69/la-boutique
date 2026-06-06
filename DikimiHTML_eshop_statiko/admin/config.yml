@@ -1,0 +1,18 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images/uploads" # Πού θα αποθηκεύονται οι φωτογραφίες που ανεβάζει
+public_folder: "/images/uploads"
+
+collections:
+  - name: "clothes"
+    label: "Ρούχα Μπουτίκ"
+    folder: "content/clothes" # Εδώ θα δημιουργείται ένα αρχειάκι για κάθε νέο ρούχο
+    create: true # Αυτό ανάβει το κουμπί "Προσθήκη Νέου Προϊόντος" στο πάνελ!
+    slug: "{{slug}}"
+    fields:
+      - {label: "Όνομα Ρούχου", name: "title", widget: "string"}
+      - {label: "Φωτογραφία Μοντέλου", name: "image", widget: "image"}
+      - {label: "Υλικό / Περιγραφή", name: "description", widget: "string"}
+      - {label: "Τιμή (€)", name: "price", widget: "string"}
