@@ -119,13 +119,15 @@
               });
 
               const productCard = `
-                <div class="bg-white border border-stone-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition">
-                  <img src="${data.image}" alt="${data.title}" class="w-full object-cover object-top bg-stone-200" style="aspect-ratio: 3/4;">
-                  <div class="p-4">
+                <div class="bg-white border border-stone-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition flex flex-col h-full">
+                  <div class="w-full h-96 overflow-hidden bg-stone-200 relative">
+                    <img src="${data.image}" alt="${data.title}" class="absolute inset-0 w-full h-full object-cover object-top">
+                  </div>
+                  <div class="p-4 flex flex-col flex-grow">
                     <span class="text-xs font-bold uppercase tracking-wider text-amber-600">${data.category || 'Γενική'}</span>
                     <h3 class="text-lg font-semibold text-stone-900 mt-1">${data.title}</h3>
-                    <p class="text-stone-500 text-sm mt-1 line-clamp-2">${data.description || ''}</p>
-                    <div class="flex items-center justify-between mt-4">
+                    <p class="text-stone-500 text-sm mt-1 line-clamp-2 flex-grow">${data.description || ''}</p>
+                    <div class="flex items-center justify-between mt-4pt-2 border-t border-stone-100">
                       <span class="text-xl font-bold text-stone-900">${data.price}€</span>
                       <button class="bg-stone-900 text-white text-xs uppercase font-medium tracking-wider px-3 py-2 rounded hover:bg-stone-800 transition">
                         Καλάθι
