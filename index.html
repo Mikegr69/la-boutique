@@ -44,4 +44,177 @@
     <main class="max-w-7xl mx-auto px-4 py-16 space-y-20">
 
         <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="relative group h-9
+            <div class="relative group h-96 bg-stone-900 overflow-hidden cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                    <h3 class="text-2xl font-serif text-white mb-2">Casual Chic</h3>
+                    <p class="text-stone-300 text-sm">Καθημερινά κομμάτια για άνεση και στυλ.</p>
+                </div>
+            </div>
+            <div class="relative group h-96 bg-stone-900 overflow-hidden cursor-pointer">
+                <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=800&q=80" class="absolute inset-0 w-full h-full object-cover opacity-80 group-hover:scale-105 transition duration-500">
+                <div class="absolute inset-0 bg-gradient-to-t from-stone-900/80 via-transparent to-transparent flex flex-col justify-end p-8">
+                    <h3 class="text-2xl font-serif text-white mb-2">Βραδινά Φορέματα</h3>
+                    <p class="text-stone-300 text-sm">Λάμψη και κομψότητα για τις ιδιαίτερες στιγμές σας.</p>
+                </div>
+            </div>
+        </section>
+
+        <div class="text-center">
+            <h2 class="text-3xl font-serif text-stone-900">must-have κομμάτια</h2>
+            <div class="h-[1px] w-20 bg-stone-400 mx-auto mt-4"></div>
+        </div>
+
+        <section id="clothes-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+            <p class="text-stone-500 col-span-3 text-center py-12 text-sm uppercase tracking-wider">Φόρτωση συλλογής...</p>
+        </section>
+
+    </main>
+
+    <footer class="bg-stone-900 text-stone-400 py-8 text-center text-xs uppercase tracking-widest">
+        &copy; 2026 La Boutique. All rights reserved.
+    </footer>
+
+    <script>
+      if (window.netlifyIdentity) {
+        window.netlifyIdentity.on("init", user => {
+          if (!user) {
+            window.netlifyIdentity.on("login", () => {
+              document.location.href = "/admin/";
+            });
+          }
+        });
+      }
+    </script>
+
+    <script>
+      const repoOwner = "Mikegr69";
+      const repoName = "la-boutique";
+      let allProducts = []; // Πίνακας αποθήκευσης των προϊόντων για το Modal
+
+      async function loadProducts() {
+        const container = document.getElementById('clothes-grid');
+        
+        try {
+          const response = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}/contents/content/clothes`);
+          if (!response.ok) throw new Error("Δεν βρέθηκε ο φάκελος στο GitHub");
+          
+          const files = await response.json();
+          container.innerHTML = ''; 
+
+          let index = 0;
+          for (let file of files) {
+            if (file.name.endsWith('.md')) {
+              const rawResponse = await fetch(file.download_url);
+              const text = await rawResponse.text();
+              
+              const parts = text.split('---');
+              if (parts.length < 2) continue;
+              
+              const lines = parts[1].split('\n');
+              const data = {};
+              
+              lines.forEach(line => {
+                const [key, ...value] = line.split(':');
+                if (key && value) data[key.trim()] = value.join(':').trim().replace(/"/g, '');
+              });
+
+              // Push στα global δεδομένα μας
+              allProducts.push(data);
+
+              const productCard = `
+                <div onclick="openProductModal(${index})" class="group bg-white border border-stone-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition flex flex-col h-full cursor-pointer">
+                  <div class="w-full bg-stone-50 relative overflow-hidden" style="aspect-ratio: 3/4;">
+                    <img src="${data.image}" alt="${data.title}" class="absolute inset-0 w-full h-full object-contain group-hover:scale-102 transition duration-300">
+                  </div>
+                  <div class="p-4 flex flex-col flex-grow">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-600">${data.category || 'Γενική'}</span>
+                    <h3 class="text-lg font-semibold text-stone-900 mt-1 group-hover:text-amber-700 transition">${data.title}</h3>
+                    
+                    <p class="text-stone-500 text-sm mt-1 mb-4 flex-grow text-justify leading-relaxed">${data.description || ''}</p>
+                    
+                    <div class="flex items-center justify-between pt-3 border-t border-stone-100 mt-auto">
+                      <span class="text-xl font-bold text-stone-900">${data.price}€</span>
+                      <button class="bg-stone-900 text-white text-xs uppercase font-medium tracking-wider px-3 py-2 rounded group-hover:bg-stone-800 transition">
+                        Προβολη
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              `;
+              container.innerHTML += productCard;
+              index++;
+            }
+          }
+        } catch (error) {
+          console.error(error);
+          container.innerHTML = `<p class="text-red-500 text-center col-span-3 py-12">Σφάλμα κατά τη φόρτωση: ${error.message}</p>`;
+        }
+      }
+
+      // Συναρτήσεις Λειτουργίας του Modal
+      function openProductModal(index) {
+        const product = allProducts[index];
+        
+        const modalHtml = `
+          <div id="product-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/60 backdrop-blur-sm opacity-0 transition-opacity duration-300">
+            <div class="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto shadow-2xl flex flex-col md:flex-row transform scale-95 transition-transform duration-300 relative">
+              
+              <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 bg-white/80 hover:bg-white text-stone-800 p-2 rounded-full shadow border border-stone-100 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+              </button>
+
+              <div class="w-full md:w-1/2 bg-stone-50 flex items-center justify-center p-4" style="min-h-[350px]">
+                <img src="${product.image}" alt="${product.title}" class="max-h-[50vh] md:max-h-[70vh] object-contain rounded-lg">
+              </div>
+
+              <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between">
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-amber-600">${product.category || 'Γενική'}</span>
+                  <h2 class="text-2xl font-serif text-stone-900 mt-1 mb-4">${product.title}</h2>
+                  <div class="h-[1px] w-12 bg-stone-300 mb-4"></div>
+                  <p class="text-stone-600 text-base leading-relaxed text-justify whitespace-pre-line">${product.description || 'Δεν υπάρχει περιγραφή.'}</p>
+                </div>
+
+                <div class="mt-8 pt-4 border-t border-stone-100 flex items-center justify-between">
+                  <div>
+                    <span class="text-xs text-stone-400 uppercase tracking-wider block">Τιμή</span>
+                    <span class="text-3xl font-bold text-stone-900">${product.price}€</span>
+                  </div>
+                  <button class="bg-stone-900 text-white uppercase tracking-widest text-xs font-semibold px-6 py-3 rounded-md hover:bg-stone-800 transition shadow">
+                    Προσθηκη στο καλαθι
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        `;
+
+        document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+        // Smooth Animation Εισόδου
+        const modal = document.getElementById('product-modal');
+        setTimeout(() => {
+          modal.classList.remove('opacity-0');
+          modal.querySelector('.transform').classList.remove('scale-95');
+        }, 10);
+      }
+
+      function closeProductModal() {
+        const modal = document.getElementById('product-modal');
+        if (modal) {
+          modal.classList.add('opacity-0');
+          modal.querySelector('.transform').classList.add('scale-95');
+          setTimeout(() => modal.remove(), 300);
+        }
+      }
+
+      // Εκκίνηση Φόρτωσης
+      loadProducts();
+    </script>
+
+</body>
+</html>
