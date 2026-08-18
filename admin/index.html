@@ -5,10 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>La Boutique - Διαχείριση</title>
   <!-- Το widget για να αναγνωρίζει το login του Netlify -->
-  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  </script>
 </head>
 <body>
   <!-- Εδώ φορτώνει η «μηχανή» του Decap CMS και διαβάζει το config.yml -->
   <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
+
+  <!-- ΕΔΩ ΜΠΑΙΝΕΙ ΤΟ ΔΙΚΟ ΜΑΣ Visual Preview ΧΩΡΙΣ ΝΑ ΧΑΛΑΣΕΙ ΤΟ Setup ΣΟΥ -->
+  <script>
+    // 1. Στέλνουμε το Tailwind v4 μέσα στο απομονωμένο Iframe του Preview
+    CMS.registerPreviewStyle("https://jsdelivr.net");
+
+    // 2. Φτιάχνουμε το Visual Template για την κάρτα του ρούχου
+    var ClothesPreview = createClass({
+      render: function() {
+        var entry = this.props.entry;
+        
+        // Τραβάμε τα δεδομένα από τα πεδία του config.yml σου
+        var title = entry.getIn(['data', 'title']) || "Όνομα Ρούχου";
+        var category = entry.getIn(['data', 'category']) || "Κατηγορία";
+        var description = entry.getIn(['data', 'description']) || "Εδώ θα εμφανιστεί η περιγραφή...";
+        var price = entry.getIn(['data', 'price']) || "0";
+        
+        // Φέρνουμε τη φωτογραφία
+        var mediaDataSource = this.props.getAsset(entry.getIn(['data', 'image']));
+        var imgUrl = mediaDataSource ? mediaDataSource.toString() : "";
+
+        // Σχεδιάζουμε live την κάρτα με Pure Tailwind v4
+        return h('div', { className: 'bg-gray-50 min-h-screen p-6 flex justify-center items-center' },
+          h('div', { className: 'max-w-sm w-full bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100' },
+            // Η εικόνα του ρούχου
+            h('div', { className: 'relative h-72 bg-gray-200 flex items-center justify-center overflow-hidden' },
+              imgUrl 
+                ? h('img', { src: imgUrl, className: 'w-full h-full object-cover' })
+                : h('span', { className: 'text-gray-400 font-medium text-sm' }, 'Χωρίς Φωτογραφία')
+            ),
+            // Πληροφορίες, τιμή και κουμπί
+            h('div', { className: 'p-6' },
+              h('span', { className: 'inline-block bg-pink-100 text-pink-600 text-xs font-semibold tracking-wide uppercase px-2.5 py-1 rounded-full mb-3' }, category),
+              h('h2', { className: 'text-2xl font-bold text-gray-800 mb-2' }, title),
+              h('p', { className: 'text-gray-500 text-sm leading-relaxed mb-4' }, description),
+              h('div', { className: 'flex justify-between items-center pt-3 border-t border-gray-100' },
+                h('span', { className: 'text-2xl font-extrabold text-gray-900' }, price + ' €'),
+                h('button', { className: 'bg-black text-white text-xs font-bold uppercase px-4 py-2.5 rounded-xl' }, 'Προσθήκη')
+              )
+            )
+          )
+        );
+      }
+    });
+
+    // 3. Ενεργοποιούμε το template για τη συλλογή "clothes" που έχεις στο config.yml
+    CMS.registerPreviewTemplate("clothes", ClothesPreview);
+  </script>
 </body>
 </html>
